@@ -5,9 +5,11 @@
 #include <string.h>
 #include <sys/time.h>
 
+
 void dump_memory_map(void);
 
 int main(int argc, char **argv) {
+	dump_memory_map();
     void *m1 = malloc(50);  // should allocate 64 bytes
     void *m2 = malloc(100); // should allocate 128 bytes
     free(m1);

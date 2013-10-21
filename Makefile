@@ -1,6 +1,6 @@
 # Makefile template for project 3
 
-CC = gcc
+CC = clang
 CFLAGS = -g -Wall
 # main executable file first
 TARGET = proj03
