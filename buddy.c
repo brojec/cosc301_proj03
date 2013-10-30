@@ -22,8 +22,8 @@ const int MINIMUM_ALLOC = sizeof(int) * 2;
 
 // global file-scope variables for keeping track
 // of the beginning of the heap.
-void *heap_begin = NULL;
-int *first_free = NULL;
+void *heap_begin = NULL; 
+int *first_free = NULL; //I REALLY don't think this should be an int*.  Either an int or a void*.
 
 
 void *malloc(size_t request_size) {
@@ -31,6 +31,7 @@ void *malloc(size_t request_size) {
     while(power < request_size+8){  //should give us the size of memory needed
     power = power*2;
     }
+    printf("request size: %d \npower: %d\n",request_size,power);
     // if heap_begin is NULL, then this must be the first
     // time that malloc has been called.  ask for a new
     // heap segment from the OS using mmap and initialize
@@ -87,6 +88,5 @@ void dump_memory_map(void) {
 		curr = curr + curr[0];
 	}
 }
-
 
 
