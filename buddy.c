@@ -23,13 +23,13 @@ const int MINIMUM_ALLOC = sizeof(int) * 2;
 // global file-scope variables for keeping track
 // of the beginning of the heap.
 void *heap_begin = NULL; 
-int *first_free = NULL; //I REALLY don't think this should be an int*.  Either an int or a void*.
+int *first_free = NULL; 
 
 
 void *malloc(size_t request_size) {
 //	printf("\nHello?");
-	int power = 8;
-    while(power < request_size+8){  //should give us the size of memory needed
+	int power = MINIMUM_ALLOC;
+    while(power < request_size+2*sizeof(int)){  //should give us the size of memory needed
     	power = power*2;
     }
     printf("request size: %d \npower: %d\n",request_size,power);
@@ -70,9 +70,10 @@ void *malloc(size_t request_size) {
    	else{
    		best[1] = next - best[0];
    	}
+   	//dump_memory_map();
    }
    best[1] = 0;
-   void* toReturn = best[2];
+   void* toReturn = best+2*sizeof(void*);
    return toReturn;
 }
 
@@ -83,10 +84,14 @@ void freeMine(void *memory_block) {
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 	}
-	while(curr + curr[1]/sizeof(int) < memory){
+	while(curr + curr[1]/sizeof(int) < memory && curr[1]!=0){
 		curr = curr + curr[1]/sizeof(int);
 		printf("%d\n",curr);//problems here!
 	}
+	int* tmp = curr;
+	curr[1] = memory-curr;
+	memory[1] = tmp-memory;
+	//merge_buddies(heap_begin);//not implemented; function to merge buddies.  Recursion?
 }
 
 void dump_memory_map(void) {
