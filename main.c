@@ -10,11 +10,12 @@ void dump_memory_map(void);
 
 int main(int argc, char **argv) {
 	//dump_memory_map();
-    void *m1 = malloc(50);  // should allocate 64 bytes
+    void *m1 = malloc(550);  // should allocate 64 bytes
+    dump_memory_map();
     //printf("malloced first 50 (64) bytes\n");
     void *m2 = malloc(100); // should allocate 128 bytes
-    freeMine(m1);
     dump_memory_map();
+    freeMine(m1);
     void *m3 = malloc(56);  // should allocate 64 bytes
     void *m4 = malloc(11);  // should allocate 32 bytes
     dump_memory_map();

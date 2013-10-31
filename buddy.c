@@ -30,7 +30,7 @@ void *malloc(size_t request_size) {
 //	printf("\nHello?");
 	int power = 8;
     while(power < request_size+8){  //should give us the size of memory needed
-    power = power*2;
+    	power = power*2;
     }
     printf("request size: %d \npower: %d\n",request_size,power);
     //printf("\n");
@@ -44,15 +44,18 @@ void *malloc(size_t request_size) {
         atexit(dump_memory_map);
         first_free = heap_begin;
         first_free[0] = HEAPSIZE;
-        first_free[1] = -1;
+        first_free[1] = 0;
     }
     int* curr = first_free;
     int* best = first_free;
-    while(curr[1] > 0){ //should stop once we get to a big enough piece of memory
+    while(1){ //should stop once we get to a big enough piece of memory
     	if(curr[0] < best[0] && curr[0] >= power){
     		best = curr;
     	}
-    	curr = curr + curr[1];
+    	curr = curr + curr[1]/sizeof(int);
+    	if(curr[1] == 0){
+    		break;
+    	}
    }
    while(best[0] > power){
    	int next = best[1];
@@ -61,7 +64,12 @@ void *malloc(size_t request_size) {
    	best[1] = best[0];
    	best = best + best[0]/sizeof(int);
    	best[0] = size;
-   	best[1] = next - best[0];
+   	if(next == 0){
+   		best[1] = 0;
+   	}
+   	else{
+   		best[1] = next - best[0];
+   	}
    }
    best[1] = 0;
    void* toReturn = best[2];
@@ -69,13 +77,16 @@ void *malloc(size_t request_size) {
 }
 
 void freeMine(void *memory_block) {
-	int* curr = heap_begin;
+	int* curr = first_free;
 	if(heap_begin == NULL){ return;}
-	int* memory = memory_block;
-	while(curr + curr[1] < memory){
-		curr = curr + curr[1];
+	int* memory = memory_block - 2*sizeof(int);
+	if(memory < first_free){
+		memory[1] = first_free-memory;
 	}
-	memory[1] = curr[1] - (memory-curr);
+	while(curr + curr[1]/sizeof(int) < memory){
+		curr = curr + curr[1]/sizeof(int);
+		printf("%d\n",curr);//problems here!
+	}
 }
 
 void dump_memory_map(void) {
@@ -84,14 +95,14 @@ void dump_memory_map(void) {
 	int* curr = heap_begin;
 	int offset = 0;
 	char* alloc;
-	while(offset < HEAPSIZE){
+	while(offset < HEAPSIZE && curr[0] > 0){
 		if(curr[1] == 0){
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
 		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
-		offset = offset + curr[0];
-		curr = curr + curr[0];
+		offset = offset + curr[0]/sizeof(int);
+		curr = curr + curr[0]/sizeof(int);
 	}
 }
 
