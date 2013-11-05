@@ -22,9 +22,13 @@ const int MINIMUM_ALLOC = sizeof(int) * 2;
 
 // global file-scope variables for keeping track
 // of the beginning of the heap.
-void *heap_begin = NULL; 
+int *heap_begin = NULL; 
 int *first_free = NULL; 
 
+int next(int** curr){
+	*curr = *curr + *curr[0]/sizeof(int);
+	return *curr>heap_begin + HEAPSIZE;
+}
 
 void *malloc(size_t request_size) {
 //	printf("\nHello?");
@@ -44,16 +48,18 @@ void *malloc(size_t request_size) {
         atexit(dump_memory_map);
         first_free = heap_begin;
         first_free[0] = HEAPSIZE;
-        first_free[1] = 0;
+        first_free[1] = -1;
     }
     int* curr = first_free;
     int* best = first_free;
-    while(1){ //should stop once we get to a big enough piece of memory
+    int* free_before = NULL;
+    while(next(&curr)){ //traverse the entire freelist
+    	if(curr[1] == 0) continue; //if we're in an allocated block
     	if(curr[0] < best[0] && curr[0] >= power){
     		best = curr;
     	}
-    	curr = curr + curr[1]/sizeof(int);
-    	if(curr[1] == 0){
+    	//curr = curr + curr[1]/sizeof(int);
+    	if(curr[1] == -1){
     		break;
     	}
    }
@@ -83,10 +89,11 @@ void freeMine(void *memory_block) {
 	int* memory = memory_block - 2*sizeof(int);
 	if(memory < first_free){
 		memory[1] = first_free-memory;
+		first_free = memory;
 	}
-	while(curr + curr[1]/sizeof(int) < memory && curr[1]!=0){
+	while(((curr + curr[1]/sizeof(int)) < memory) && curr[1]!=0){
 		curr = curr + curr[1]/sizeof(int);
-		printf("%d\n",curr);//problems here!
+		printf("%p\n",curr);//problems here!
 	}
 	int* tmp = curr;
 	curr[1] = memory-curr;
@@ -96,18 +103,18 @@ void freeMine(void *memory_block) {
 
 void dump_memory_map(void) {
 
-	printf("Got into memory map\n");
+	printf("\nMemory Map:\n");
 	int* curr = heap_begin;
 	int offset = 0;
 	char* alloc;
-	while(offset < HEAPSIZE && curr[0] > 0){
+	for(;curr<heap_begin+HEAPSIZE;next(&curr)){
 		if(curr[1] == 0){
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
 		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
-		offset = offset + curr[0]/sizeof(int);
-		curr = curr + curr[0]/sizeof(int);
+		offset = offset + curr[0];
+		//curr = curr + curr[0]/sizeof(int);
 	}
 }
 
