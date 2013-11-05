@@ -27,7 +27,11 @@ int *first_free = NULL;
 
 int next(int** curr){
 	*curr = *curr + *curr[0]/sizeof(int);
-	return *curr>heap_begin + HEAPSIZE;
+	return *curr<heap_begin + HEAPSIZE/sizeof(int);
+}
+
+int inBounds(int** curr){
+	return *curr<heap_begin+HEAPSIZE/sizeof(int);
 }
 
 void *malloc(size_t request_size) {
@@ -52,33 +56,43 @@ void *malloc(size_t request_size) {
     }
     int* curr = first_free;
     int* best = first_free;
-    int* free_before = NULL;
-    while(next(&curr)){ //traverse the entire freelist
-    	if(curr[1] == 0) continue; //if we're in an allocated block
+    for(;inBounds(&curr);next(&curr)){ //traverse the entire freelist
+    	if(curr[1] == 0) continue; //if we're in an allocated block, skip it
     	if(curr[0] < best[0] && curr[0] >= power){
     		best = curr;
     	}
-    	//curr = curr + curr[1]/sizeof(int);
-    	if(curr[1] == -1){
-    		break;
-    	}
    }
+
+	if(best==first_free){
+	        if(best[0]==power)
+	 		first_free = best+best[1]/sizeof(int);
+	}
+	
+	
+	//int* free_before = NULL;
+	
    while(best[0] > power){
    	int next = best[1];
    	best[0] = best[0]/2;
    	int size = best[0];
-   	best[1] = best[0];
-   	best = best + best[0]/sizeof(int);
+   	best[1] = size;
+   	//free_before = best;
+   	best = best + size/sizeof(int);
    	best[0] = size;
-   	if(next == 0){
-   		best[1] = 0;
-   	}
-   	else{
-   		best[1] = next - best[0];
-   	}
-   	//dump_memory_map();
+	best[1] = next - best[0];
    }
+   
    best[1] = 0;
+   
+   int* last_free = NULL;
+   for(curr = first_free;inBounds(&curr);next(&curr)){
+   	if(curr[1] != 0) last_free = curr; //if the block isn't allocated, move last_free up
+   }
+   
+   if(last_free!=NULL){
+   	last_free[1] = -1; //if the whole block isn't allocated, set an "end of free-list" flag
+   }
+         
    void* toReturn = best+2*sizeof(void*);
    return toReturn;
 }
@@ -103,11 +117,11 @@ void freeMine(void *memory_block) {
 
 void dump_memory_map(void) {
 
-	printf("\nMemory Map:\n");
+	printf("\n--------------------Memory Map--------------------\n");
 	int* curr = heap_begin;
 	int offset = 0;
 	char* alloc;
-	for(;curr<heap_begin+HEAPSIZE;next(&curr)){
+	for(;inBounds(&curr);next(&curr)){
 		if(curr[1] == 0){
 			alloc = "Allocated";
 		}
@@ -116,6 +130,7 @@ void dump_memory_map(void) {
 		offset = offset + curr[0];
 		//curr = curr + curr[0]/sizeof(int);
 	}
+	printf("--------------------------------------------------\n");
 }
 
 
