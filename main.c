@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 	dump_memory_map();
 	void* m2 = malloc(125);
 	dump_memory_map();
-	freeMine(m1);
+	//freeMine(m1);
 	dump_memory_map();
 	
 	/*

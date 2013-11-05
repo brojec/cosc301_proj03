@@ -25,10 +25,18 @@ const int MINIMUM_ALLOC = sizeof(int) * 2;
 int *heap_begin = NULL; 
 int *first_free = NULL; 
 
-int next(int** curr){
-	*curr = *curr + *curr[0]/sizeof(int);
-	return *curr<heap_begin + HEAPSIZE/sizeof(int);
+void next(int** curr){
+	if(*curr + *curr[0]/sizeof(int) < heap_begin+HEAPSIZE)
+		*curr = *curr + *curr[0]/sizeof(int);
 }
+
+
+void next_free(int** curr){
+	do{
+		next(curr);
+	}while(*curr[1]==0);
+}
+
 
 int inBounds(int** curr){
 	return *curr<heap_begin+HEAPSIZE/sizeof(int);
@@ -98,20 +106,25 @@ void *malloc(size_t request_size) {
 }
 
 void freeMine(void *memory_block) {
-	int* curr = first_free;
 	if(heap_begin == NULL){ return;}
 	int* memory = memory_block - 2*sizeof(int);
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 		first_free = memory;
+	}else{
+		int* curr = first_free;
+		do{
+			next(&curr);
+		}while(curr[1]==0);
+		int* before = first_free;
+		while(curr!=memory){
+			before = curr;
+			do{
+				next(&curr);
+			}while(curr[1]==0);
+		}
+		memory[1] = before[1] + before
 	}
-	while(((curr + curr[1]/sizeof(int)) < memory) && curr[1]!=0){
-		curr = curr + curr[1]/sizeof(int);
-		printf("%p\n",curr);//problems here!
-	}
-	int* tmp = curr;
-	curr[1] = memory-curr;
-	memory[1] = tmp-memory;
 	//merge_buddies(heap_begin);//not implemented; function to merge buddies.  Recursion?
 }
 
