@@ -32,9 +32,8 @@ void next(int** curr){
 
 
 void next_free(int** curr){
-	do{
-		next(curr);
-	}while(*curr[1]==0);
+	if(*curr[1]!=0)
+		*curr = *curr + *curr[1]/sizeof(int);
 }
 
 
@@ -82,7 +81,7 @@ void *malloc(size_t request_size) {
    while(best[0] > power){
    	int next = best[1];
    	best[0] = best[0]/2;
-   	int size = best[0];
+  	int size = best[0];
    	best[1] = size;
    	//free_before = best;
    	best = best + size/sizeof(int);
@@ -101,13 +100,15 @@ void *malloc(size_t request_size) {
    	last_free[1] = -1; //if the whole block isn't allocated, set an "end of free-list" flag
    }
          
-   void* toReturn = best+2*sizeof(void*);
+   void* toReturn = best;
+   toReturn += 2;
+   printf("returned pointer %p %p\n", toReturn);
    return toReturn;
 }
 
 void freeMine(void *memory_block) {
 	if(heap_begin == NULL){ return;}
-	int* memory = memory_block - 2*sizeof(int);
+	int* memory = memory_block - 2/sizeof(int);
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 		first_free = memory;
@@ -117,13 +118,14 @@ void freeMine(void *memory_block) {
 			next(&curr);
 		}while(curr[1]==0);
 		int* before = first_free;
-		while(curr!=memory){
+		while(curr<memory){
 			before = curr;
 			do{
 				next(&curr);
 			}while(curr[1]==0);
 		}
-		memory[1] = before[1] + before
+		memory[1] = before + before[1]/sizeof(int) - memory;
+		before[1] = memory-before;
 	}
 	//merge_buddies(heap_begin);//not implemented; function to merge buddies.  Recursion?
 }
@@ -139,7 +141,7 @@ void dump_memory_map(void) {
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
-		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
+		printf("Block size: %d, offset %d, %s, %p\n", curr[0], offset, alloc, curr);
 		offset = offset + curr[0];
 		//curr = curr + curr[0]/sizeof(int);
 	}
