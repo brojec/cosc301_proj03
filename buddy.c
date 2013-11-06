@@ -76,15 +76,42 @@ void *malloc(size_t request_size) {
 	 		first_free = best+best[1]/sizeof(int);
 	}
 	
-	
-   while(best[0] > power){
-   	int next = best[1];
+	int* temp = best;
+	if(best[1] == -1){
+		temp = NULL;
+	}
+   	else do{
+   		next(&temp);
+   	}while(temp[1] == 0);
+   	
+   	if(best[0] == power){
+	   	int* tester = first_free;
+		do{
+			next(&tester);
+		}while(tester[1]==0);
+		int* before = first_free;
+		while(tester<best){
+			before = tester;
+			do{
+				next(&tester);
+			}while(tester[1]==0);
+		}
+		before[1] = before[1] + best[1];
+		printf("empty\n");
+	}
+   	
+   while(best[0] > power){ //cut it in half, move to the second half
    	best[0] = best[0]/2;
   	int size = best[0];
    	best[1] = size;
    	best = best + size/sizeof(int);
    	best[0] = size;
-	best[1] = next - best[0];
+   	if(temp == NULL){
+   		best[1] = -1;
+   	}
+   	else{
+	best[1] = temp - best;
+	}
    }
    
    best[1] = 0;
@@ -124,25 +151,27 @@ void freeMine(void *memory_block) {
 				next(&curr);
 			}while(curr[1]==0);
 		}
-		memory[1] = before + before[1]/sizeof(int) - memory;
-		before[1] = memory-before;
+		memory[1] = (before- memory)*sizeof(int) + before[1] ;
+		before[1] = (memory-before)*sizeof(int);
+		printf("empty\n");
 	}
 	int* be4 = first_free;//#yoloswag
 	while(be4 + be4[0]/sizeof(int) < memory){
 		next(&be4);
 	}
-	printf("%p\n",be4);
-	printf("%p\n", memory);
+	//printf("%p\n",be4);
+	//printf("%p\n", memory);
 	merge_buddies(memory,be4);
 }
 
 void merge_buddies(int* memory, int* before){
+	dump_memory_map();
 	int* after = memory;
 	next(&after);
-	if(after[1] == 0 || (after == memory && after[0] == memory[0])){
+	if(after[1] == 0 || after == memory || after[0] != memory[0]){
 		after = NULL;
 	}
-	if(before[1] == 0 || (before == memory && before[0] == memory[0])){
+	if(before[1] == 0 || before == memory || before[0] != memory[0]){
 		before = NULL;
 	}
 	int* curr = first_free;
@@ -166,6 +195,9 @@ void merge_buddies(int* memory, int* before){
 	if(before != NULL){
 		before[0] = before[0]*2;
 		before[1] = memory[1] + memory[0];
+		if(memory[1] == -1){
+			before[1] = -1;
+		}
 		did_merge = 1;
 		memory = before;
 	}
@@ -173,12 +205,24 @@ void merge_buddies(int* memory, int* before){
 		memory[0] = memory[0]*2;
 		memory[1] = after[1] + after[0];
 		did_merge = 1;
+		if(after[1] == -1){
+			memory[1] = -1;
+		}
 	}
 	int* be4 = first_free;
-	do{
-		next(&be4);
-	}while(before<memory);
-	if(did_merge){
+	int* test = first_free;
+	while(test<memory){
+		next(&test);
+		if(test < memory){
+			next(&be4);
+		}
+	}
+	if(memory[0] == HEAPSIZE){
+		return;
+	}
+	else if(did_merge){
+		//dump_memory_map();
+		//printf("just merged stuff\n");
 		merge_buddies(memory,be4);
 	}
 }

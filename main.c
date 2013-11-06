@@ -29,15 +29,17 @@ int main(int argc, char **argv) {
     void *m6 = malloc(120); // should allocate 128 bytes
         dump_memory_map();
     freeMine(m2);
-    freeMine(m4);
+    //freeMine(m4);
+    dump_memory_map();
     freeMine(m5);
     dump_memory_map();
     //printf("freeing 11\n");
     //freeMine(m4);
     dump_memory_map();
     //printf("freeing 120\n");
-    //freeMine(m6);
-    freeMine(m5);
+    printf("NOT EVERYTHING SHOULD BE FREE\n");
+    freeMine(m6);
+    //freeMine(m5);
 
     return 0;
 }
