@@ -103,8 +103,9 @@ void *malloc(size_t request_size) {
 }
 
 void freeMine(void *memory_block) {
+	printf("freeing %p\n", memory_block-2);
 	if(heap_begin == NULL){ return;}
-	int* memory = memory_block - 2/sizeof(int);
+	int* memory = memory_block - 2;
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 		first_free = memory;
@@ -137,7 +138,7 @@ void dump_memory_map(void) {
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
-		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
+		printf("Block size: %d, offset %d, %s, %p\n", curr[0], offset, alloc, curr);
 		offset = offset + curr[0];
 		//curr = curr + curr[0]/sizeof(int);
 	}
