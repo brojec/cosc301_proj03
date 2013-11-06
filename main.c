@@ -31,6 +31,12 @@ int main(int argc, char **argv) {
         dump_memory_map();
         printf("freeing 100\n");
     freeMine(m2);
+    dump_memory_map();
+    printf("freeing 11\n");
+    freeMine(m4);
+    dump_memory_map();
+    printf("freeing 120\n");
+    freeMine(m6);
 
     return 0;
 }

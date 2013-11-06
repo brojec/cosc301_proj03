@@ -14,6 +14,7 @@
 // function declarations
 void *malloc(size_t);
 void freeMine(void *);
+void merge_buddies(int*, int*);
 void dump_memory_map(void);
 
 
@@ -104,7 +105,7 @@ void *malloc(size_t request_size) {
 
 void freeMine(void *memory_block) {
 	if(heap_begin == NULL){ return;}
-	int* memory = memory_block - 2/sizeof(int);
+	int* memory = memory_block-2;
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 		first_free = memory;
@@ -123,7 +124,60 @@ void freeMine(void *memory_block) {
 		memory[1] = before + before[1]/sizeof(int) - memory;
 		before[1] = memory-before;
 	}
-	//merge_buddies(heap_begin);//not implemented; function to merge buddies.  Recursion?
+	int* be4 = first_free;//#yoloswag
+	while(be4<memory){
+		next(&be4);
+	}
+	printf("%p\n",be4);
+	printf("%p\n", memory);
+	//merge_buddies(memory,be4);
+}
+
+void merge_buddies(int* memory, int* before){
+	int* after = memory;
+	next(&after);
+	if(after[1] == 0 || (after == memory && after[0] == memory[0])){
+		after = NULL;
+	}
+	if(before[1] == 0 || (before == memory && before[0] == memory[0])){
+		before = NULL;
+	}
+	int* curr = first_free;
+	int jump_size = HEAPSIZE/2;
+	while(curr != memory){
+		if(curr > memory){
+			if(curr == after){
+				after = NULL;
+			}
+			curr = curr-jump_size/sizeof(int);
+		}
+		if(curr < memory){
+			curr = curr + jump_size/sizeof(int);
+		}
+		if(curr != memory){
+			jump_size = jump_size/2;
+		}
+		
+	}
+	int did_merge = 0;
+	if(before != NULL){
+		before[0] = before[0]*2;
+		before[1] = memory[1] + memory[0];
+		did_merge = 1;
+		memory = before;
+	}
+	else if(after != NULL){
+		memory[0] = memory[0]*2;
+		memory[1] = after[1] + after[0];
+		did_merge = 1;
+	}
+	int* be4 = first_free;
+	do{
+		next(&be4);
+	}while(before<memory);
+	if(did_merge){
+		merge_buddies(memory,be4);
+	}
 }
 
 void dump_memory_map(void) {
@@ -137,7 +191,7 @@ void dump_memory_map(void) {
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
-		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
+		printf("Block size: %d, offset %d, %s, %p\n", curr[0], offset, alloc, curr);
 		offset = offset + curr[0];
 		//curr = curr + curr[0]/sizeof(int);
 	}
