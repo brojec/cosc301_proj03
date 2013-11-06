@@ -18,25 +18,26 @@ int main(int argc, char **argv) {
     printf("freeing 550\n");
     freeMine(m1);
         dump_memory_map();
-    void *m3 = malloc(56);  // should allocate 64 bytes
-        dump_memory_map();
-    void *m4 = malloc(11);  // should allocate 32 bytes
-    dump_memory_map();
-    printf("freeing 56\n");
-    freeMine(m3);
+    //void *m3 = malloc(56);  // should allocate 64 bytes
+      //  dump_memory_map();
+    //void *m4 = malloc(11);  // should allocate 32 bytes
+    //dump_memory_map();
+    //printf("freeing 56\n");
+    //freeMine(m3);
         dump_memory_map();
     void *m5 = malloc(30);  // should allocate 64 bytes
         dump_memory_map();
-    void *m6 = malloc(120); // should allocate 128 bytes
-        dump_memory_map();
+    //void *m6 = malloc(120); // should allocate 128 bytes
+        //dump_memory_map();
         printf("freeing 100\n");
     freeMine(m2);
     dump_memory_map();
-    printf("freeing 11\n");
-    freeMine(m4);
+    //printf("freeing 11\n");
+    //freeMine(m4);
     dump_memory_map();
-    printf("freeing 120\n");
-    freeMine(m6);
+    //printf("freeing 120\n");
+    //freeMine(m6);
+    freeMine(m5);
 
     return 0;
 }
