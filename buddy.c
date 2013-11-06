@@ -76,14 +76,11 @@ void *malloc(size_t request_size) {
 	}
 	
 	
-	//int* free_before = NULL;
-	
    while(best[0] > power){
    	int next = best[1];
    	best[0] = best[0]/2;
   	int size = best[0];
    	best[1] = size;
-   	//free_before = best;
    	best = best + size/sizeof(int);
    	best[0] = size;
 	best[1] = next - best[0];
@@ -102,7 +99,6 @@ void *malloc(size_t request_size) {
          
    void* toReturn = best;
    toReturn += 2;
-   printf("returned pointer %p %p\n", toReturn);
    return toReturn;
 }
 
@@ -141,7 +137,7 @@ void dump_memory_map(void) {
 			alloc = "Allocated";
 		}
 		else alloc = "Free";
-		printf("Block size: %d, offset %d, %s, %p\n", curr[0], offset, alloc, curr);
+		printf("Block size: %d, offset %d, %s\n", curr[0], offset, alloc);
 		offset = offset + curr[0];
 		//curr = curr + curr[0]/sizeof(int);
 	}
