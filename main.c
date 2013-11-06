@@ -9,7 +9,6 @@
 void dump_memory_map(void);
 
 int main(int argc, char **argv) {
-		
 	//dump_memory_map();
     void *m1 = malloc(550);  // should allocate 64 bytes
     dump_memory_map();
@@ -32,6 +31,11 @@ int main(int argc, char **argv) {
     freeMine(m2);
     freeMine(m4);
     freeMine(m5);
+    dump_memory_map();
+    printf("freeing 11\n");
+    freeMine(m4);
+    dump_memory_map();
+    printf("freeing 120\n");
     freeMine(m6);
 
     return 0;
