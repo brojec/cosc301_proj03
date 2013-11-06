@@ -104,8 +104,11 @@ void *malloc(size_t request_size) {
 }
 
 void freeMine(void *memory_block) {
+	printf("freeing %p\n", memory_block-2);
 	if(heap_begin == NULL){ return;}
-	int* memory = memory_block-2;
+
+	int* memory = memory_block - 2;
+
 	if(memory < first_free){
 		memory[1] = first_free-memory;
 		first_free = memory;
@@ -125,12 +128,12 @@ void freeMine(void *memory_block) {
 		before[1] = memory-before;
 	}
 	int* be4 = first_free;//#yoloswag
-	while(be4<memory){
+	while(be4 + be4[0]/sizeof(int) < memory){
 		next(&be4);
 	}
 	printf("%p\n",be4);
 	printf("%p\n", memory);
-	//merge_buddies(memory,be4);
+	merge_buddies(memory,be4);
 }
 
 void merge_buddies(int* memory, int* before){
